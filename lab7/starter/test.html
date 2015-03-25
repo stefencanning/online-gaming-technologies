@@ -1,0 +1,82 @@
+<html>
+
+<div id='signin'> <img id='signinButton' src="sign-in-with-twitter-gray.png" onclick=startAuth()> </div>
+<script>
+
+//TODO: change these
+var home = "http://52.17.79.20:8000/test.html";
+var url = "http://52.17.79.20:8888/oauth/";
+
+//check if the parameters are in the url, if they are, then we're on step 2
+oauth_token = getParameterByName("oauth_token");
+oauth_verifier = getParameterByName("oauth_verifier");
+if(oauth_token !="" && oauth_verifier !="" )
+{
+     step2(oauth_token, oauth_verifier);     
+}
+
+
+
+function startAuth()
+{
+  console.log("start auth")
+  
+  function reqListener () {
+    //should return the twitter url to redirect to
+    console.log(this.responseText);
+    window.location = this.responseText;
+  }
+
+  var oReq = new XMLHttpRequest();
+  oReq.onload = reqListener;
+  oReq.open("get", url, true);
+
+  oReq.send(null);
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function step2()
+{
+  console.log(oauth_token);
+  console.log(oauth_verifier);
+  
+  var oReq = new XMLHttpRequest();
+  oReq.onload = reqListener2;
+  
+  var params = "?oauth_token="+oauth_token+"&oauth_verifier="+oauth_verifier;
+  oReq.open("get", url+params, true);
+
+  oReq.send(null);
+
+
+  function reqListener2 () {
+    var screenName =this.responseText; 
+    console.log(screenName);
+
+    var signin= document.getElementById('signin');
+    var signinButton= document.getElementById('signinButton');
+    signinButton.parentNode.removeChild(signinButton);
+
+    signin.innerHTML=screenName;
+
+      
+    //remove parameters from url
+    var urlPath=window.location.pathname;
+    
+    //See http://diveintohtml5.info/history.html
+    window.history.pushState(null,null, urlPath);
+  }
+
+
+
+}
+
+</script>
+
+</html>
